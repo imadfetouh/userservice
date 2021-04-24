@@ -20,7 +20,6 @@ public class RabbitConfiguration {
     private RabbitConfiguration() {
         connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(System.getenv("RABBIT_HOST"));
-        connection = createConnection();
     }
 
     public static RabbitConfiguration getInstance() {
@@ -45,8 +44,11 @@ public class RabbitConfiguration {
         }
     }
 
-    public Channel getChannel() {
+    public synchronized Channel getChannel() {
         try {
+            if(connection == null) {
+                createConnection();
+            }
             return connection.createChannel();
         } catch (IOException e) {
             logger.log(Level.ALL, e.getMessage());
