@@ -23,7 +23,7 @@ public class PasswordHash {
             byte[] bytes = messageDigest.digest(password.getBytes());
             StringBuilder stringBuilder = new StringBuilder();
 
-            for(byte b : bytes) {
+            for (byte b : bytes) {
                 int value = 0xFF & b;
                 stringBuilder.append(Integer.toHexString(value));
             }
