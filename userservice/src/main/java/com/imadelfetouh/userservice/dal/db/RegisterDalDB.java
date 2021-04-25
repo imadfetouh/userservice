@@ -8,6 +8,7 @@ import com.imadelfetouh.userservice.dalinterface.RegisterDal;
 import com.imadelfetouh.userservice.model.dto.NewUserDTO;
 import com.imadelfetouh.userservice.model.dto.ProfileDTO;
 import com.imadelfetouh.userservice.model.dto.RegisterDTO;
+import com.imadelfetouh.userservice.model.dto.UserData;
 import com.imadelfetouh.userservice.model.response.ResponseModel;
 import com.imadelfetouh.userservice.model.response.ResponseType;
 import com.imadelfetouh.userservice.rabbit.RabbitProducer;
@@ -21,16 +22,18 @@ import java.util.UUID;
 public class RegisterDalDB implements RegisterDal {
 
     @Override
-    public ResponseModel<Void> register(RegisterDTO registerDTO) {
+    public ResponseModel<UserData> register(RegisterDTO registerDTO) {
+        ResponseModel<UserData> responseRegister = new ResponseModel<>();
+
         Executer<Void> executer = new Executer<>(SessionType.READ);
         ResponseModel<Void> responseModel = executer.execute(new CheckUsernameExecuter(registerDTO.getUsername()));
 
         if(responseModel.getResponseType().equals(ResponseType.CORRECT)) {
-            Executer<Void> executerRegister = new Executer<>(SessionType.WRITE);
+            Executer<UserData> executerRegister = new Executer<>(SessionType.WRITE);
             String userId = UUID.randomUUID().toString();
-            responseModel = executerRegister.execute(new RegisterExecuter(userId, registerDTO.getUsername()));
+            responseRegister = executerRegister.execute(new RegisterExecuter(userId, registerDTO.getUsername()));
 
-            if(responseModel.getResponseType().equals(ResponseType.CORRECT)) {
+            if(responseRegister.getResponseType().equals(ResponseType.CORRECT)) {
                 String profileId = UUID.randomUUID().toString();
                 String password = PasswordHash.getInstance().hash(registerDTO.getPassword());
                 NewUserDTO newUserDTO = new NewUserDTO(userId, registerDTO.getUsername(), password, "USER", registerDTO.getPhoto(), new ProfileDTO(profileId, registerDTO.getBio(), registerDTO.getLocation(), registerDTO.getWebsite()));
@@ -39,7 +42,10 @@ public class RegisterDalDB implements RegisterDal {
                 rabbitProducer.produce(new AddUserProducer(newUserDTO));
             }
         }
+        else{
+            responseRegister.setResponseType(responseModel.getResponseType());
+        }
 
-        return responseModel;
+        return responseRegister;
     }
 }

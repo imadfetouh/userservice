@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice-deployment
+  labels:
+    app: userservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userservice
+  template:
+    metadata:
+      labels:
+        app: userservice
+    spec:
+      containers:
+        - name: userservice
+          imagePullPolicy: Always
+          image: imadelfetouh99/userservice:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: USERSERVICE_MYSQL_MASTER_HOST
+              value: mysql-userservice-master-service
+            - name: USERSERVICE_MYSQL_REPLICA_HOST
+              value: mysql-userservice-replica-service
+            - name: USERSERVICE_MYSQL_MASTER_PORT
+              value: '3309'
+            - name: USERSERVICE_MYSQL_REPLICA_PORT
+              value: '3311'
+            - name: MYSQL_USER
+              value: root
+            - name: MYSQL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mysql
+                  key: password
+            - name: RABBIT_HOST
+              value: rabbit-service
+          resources:
+            limits:
+              memory: 256Mi
+              cpu: 100m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice-service
+spec:
+  selector:
+    app: authservice
+  ports:
+    - port: 8081
+      targetPort: 8080

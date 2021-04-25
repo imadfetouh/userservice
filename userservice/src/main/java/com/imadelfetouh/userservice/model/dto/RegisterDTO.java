@@ -6,14 +6,16 @@ public class RegisterDTO implements Serializable {
 
     private String username;
     private String password;
+    private String repeatPassword;
     private String photo;
     private String bio;
     private String location;
     private String website;
 
-    public RegisterDTO(String username, String password, String photo, String bio, String location, String website) {
+    public RegisterDTO(String username, String password, String repeatPassword, String photo, String bio, String location, String website) {
         this.username = username;
         this.password = password;
+        this.repeatPassword = repeatPassword;
         this.photo = photo;
         this.bio = bio;
         this.location = location;
@@ -34,6 +36,14 @@ public class RegisterDTO implements Serializable {
 
     public String getPassword() {
         return password;
+    }
+
+    public void setRepeatPassword(String repeatPassword) {
+        this.repeatPassword = repeatPassword;
+    }
+
+    public String getRepeatPassword() {
+        return repeatPassword;
     }
 
     public void setPhoto(String photo) {
