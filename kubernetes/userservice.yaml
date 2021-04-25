@@ -19,7 +19,7 @@ spec:
           imagePullPolicy: Always
           image: imadelfetouh99/userservice:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 8087
           env:
             - name: USERSERVICE_MYSQL_MASTER_HOST
               value: mysql-userservice-master-service
@@ -46,10 +46,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: authservice-service
+  name: userservice-service
 spec:
   selector:
     app: authservice
   ports:
-    - port: 8081
-      targetPort: 8080
+    - port: 8087
+      targetPort: 8087
