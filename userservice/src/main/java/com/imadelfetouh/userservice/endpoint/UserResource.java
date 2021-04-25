@@ -23,7 +23,6 @@ public class UserResource {
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserData> register(@RequestBody RegisterDTO registerDTO) {
-
         if(registerDTO.getUsername().trim().equals("") || registerDTO.getPassword().trim().equals("") || registerDTO.getRepeatPassword().trim().equals("") || registerDTO.getPhoto().trim().equals("") || registerDTO.getBio().equals("") || registerDTO.getLocation().trim().equals("") || registerDTO.getWebsite().trim().equals("")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
