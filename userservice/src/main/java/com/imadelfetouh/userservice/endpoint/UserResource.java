@@ -1,5 +1,6 @@
 package com.imadelfetouh.userservice.endpoint;
 
+import com.google.gson.Gson;
 import com.imadelfetouh.userservice.dalinterface.RegisterDal;
 import com.imadelfetouh.userservice.model.dto.RegisterDTO;
 import com.imadelfetouh.userservice.model.dto.UserData;
@@ -9,20 +10,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("user")
 public class UserResource {
 
+    private static final Logger logger = Logger.getLogger(UserResource.class.getName());
+
     @Autowired
     private RegisterDal registerDal;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserData> register(@RequestBody RegisterDTO registerDTO) {
+    public ResponseEntity<UserData> register(@RequestParam("user") String user, @RequestParam("photo") MultipartFile multipartFile) {
+        Gson gson = new Gson();
+
+        RegisterDTO registerDTO = gson.fromJson(user, RegisterDTO.class);
+
         if(registerDTO.getUsername().trim().equals("") || registerDTO.getPassword().trim().equals("") || registerDTO.getRepeatPassword().trim().equals("") || registerDTO.getPhoto().trim().equals("") || registerDTO.getBio().equals("") || registerDTO.getLocation().trim().equals("") || registerDTO.getWebsite().trim().equals("")) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -33,6 +44,7 @@ public class UserResource {
         ResponseModel<UserData> responseModel = registerDal.register(registerDTO);
 
         if(responseModel.getResponseType().equals(ResponseType.CORRECT)) {
+            uploadPhoto(multipartFile);
             return ResponseEntity.ok().body(responseModel.getData());
         }
         else if(responseModel.getResponseType().equals(ResponseType.USERNAMEALREADYINUSE)) {
@@ -40,5 +52,16 @@ public class UserResource {
         }
 
         return ResponseEntity.status(500).build();
+    }
+
+    private void uploadPhoto(MultipartFile multipartFile) {
+        try {
+            String folder = "D:/imageskwetter/";
+            byte[] bytes = multipartFile.getBytes();
+            Path path = Paths.get(folder + multipartFile.getOriginalFilename());
+            Files.write(path, bytes);
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+        }
     }
 }

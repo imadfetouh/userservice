@@ -24,11 +24,11 @@ spec:
             - name: USERSERVICE_MYSQL_MASTER_HOST
               value: mysql-userservice-master-service
             - name: USERSERVICE_MYSQL_REPLICA_HOST
-              value: mysql-userservice-replica-service
+              value: mysql-userservice-master-service
             - name: USERSERVICE_MYSQL_MASTER_PORT
               value: '3324'
             - name: USERSERVICE_MYSQL_REPLICA_PORT
-              value: '3326'
+              value: '3324'
             - name: MYSQL_USER
               value: root
             - name: MYSQL_PASS
