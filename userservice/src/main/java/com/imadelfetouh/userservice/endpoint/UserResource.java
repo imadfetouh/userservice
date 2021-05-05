@@ -2,6 +2,7 @@ package com.imadelfetouh.userservice.endpoint;
 
 import com.google.gson.Gson;
 import com.imadelfetouh.userservice.dalinterface.RegisterDal;
+import com.imadelfetouh.userservice.jwt.CreateJWTToken;
 import com.imadelfetouh.userservice.model.dto.RegisterDTO;
 import com.imadelfetouh.userservice.model.dto.UserData;
 import com.imadelfetouh.userservice.model.response.ResponseModel;
@@ -13,10 +14,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
@@ -29,7 +34,7 @@ public class UserResource {
     private RegisterDal registerDal;
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<UserData> register(@RequestParam("user") String user, @RequestParam("photo") MultipartFile multipartFile) {
+    public ResponseEntity<UserData> register(@RequestParam("user") String user, @RequestParam("photo") MultipartFile multipartFile, HttpServletResponse response) {
         Gson gson = new Gson();
 
         RegisterDTO registerDTO = gson.fromJson(user, RegisterDTO.class);
@@ -45,6 +50,20 @@ public class UserResource {
 
         if(responseModel.getResponseType().equals(ResponseType.CORRECT)) {
             uploadPhoto(multipartFile);
+
+            Map<String, String> claims = new HashMap<>();
+            claims.put("userdata", gson.toJson(responseModel.getData()));
+            String token = CreateJWTToken.getInstance().create(claims);
+
+            Cookie cookie = new Cookie("jwt-token", token);
+            cookie.setHttpOnly(true);
+            cookie.setSecure(false);
+            cookie.setComment("");
+            cookie.setPath("/");
+            cookie.setDomain("20.80.120.180");
+
+            response.addCookie(cookie);
+
             return ResponseEntity.ok().body(responseModel.getData());
         }
         else if(responseModel.getResponseType().equals(ResponseType.USERNAMEALREADYINUSE)) {

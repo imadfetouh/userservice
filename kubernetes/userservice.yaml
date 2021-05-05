@@ -38,6 +38,8 @@ spec:
                   key: password
             - name: RABBIT_HOST
               value: rabbit-service
+            - name: secretkey
+              value: secretkeyforkwetterimadinjwt@semester6
           resources:
             limits:
               memory: 256Mi
