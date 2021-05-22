@@ -7,6 +7,7 @@ import com.imadelfetouh.userservice.model.dto.RegisterDTO;
 import com.imadelfetouh.userservice.model.dto.UserData;
 import com.imadelfetouh.userservice.model.response.ResponseModel;
 import com.imadelfetouh.userservice.model.response.ResponseType;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @RestController
@@ -46,10 +48,13 @@ public class UserResource {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
 
+        String photo = UUID.randomUUID().toString() + FilenameUtils.getExtension(multipartFile.getOriginalFilename());
+        registerDTO.setPhoto(photo);
+
         ResponseModel<UserData> responseModel = registerDal.register(registerDTO);
 
         if(responseModel.getResponseType().equals(ResponseType.CORRECT)) {
-            uploadPhoto(multipartFile);
+            uploadPhoto(multipartFile, photo);
 
             Map<String, String> claims = new HashMap<>();
             claims.put("userdata", gson.toJson(responseModel.getData()));
@@ -73,11 +78,11 @@ public class UserResource {
         return ResponseEntity.status(500).build();
     }
 
-    private void uploadPhoto(MultipartFile multipartFile) {
+    private void uploadPhoto(MultipartFile multipartFile, String photo) {
         try {
             String folder = "D:/imageskwetter/";
             byte[] bytes = multipartFile.getBytes();
-            Path path = Paths.get(folder + multipartFile.getOriginalFilename());
+            Path path = Paths.get(folder + photo);
             Files.write(path, bytes);
         } catch (IOException e) {
             logger.severe(e.getMessage());

@@ -20,6 +20,7 @@ public class RabbitConfiguration {
     private RabbitConfiguration() {
         connectionFactory = new ConnectionFactory();
         connectionFactory.setHost(System.getenv("RABBIT_HOST"));
+        connection = createConnection();
     }
 
     public static RabbitConfiguration getInstance() {
@@ -27,20 +28,12 @@ public class RabbitConfiguration {
     }
 
     private Connection createConnection() {
-        int count = 0;
-        int maxCount = 3;
-
-        while(true) {
-            try {
-                count++;
-                connection = connectionFactory.newConnection();
-                return connection;
-            } catch (IOException | TimeoutException e) {
-                logger.log(Level.ALL, e.getMessage());
-                if(count == maxCount){
-                    return null;
-                }
-            }
+        try {
+            connection = connectionFactory.newConnection();
+            return connection;
+        } catch (IOException | TimeoutException e) {
+            logger.severe(e.getMessage());
+            return null;
         }
     }
 
@@ -54,5 +47,9 @@ public class RabbitConfiguration {
             logger.log(Level.ALL, e.getMessage());
             return null;
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }
