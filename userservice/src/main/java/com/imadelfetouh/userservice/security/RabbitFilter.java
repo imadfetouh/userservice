@@ -15,7 +15,7 @@ public class RabbitFilter implements Filter {
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
 
-        if(RabbitConfiguration.getInstance().getConnection() == null && !httpServletRequest.getMethod().equals("GET")) {
+        if(!RabbitConfiguration.getInstance().getConnection().isOpen() && !httpServletRequest.getMethod().equals("GET")) {
             httpServletResponse.setStatus(503);
             return;
         }
