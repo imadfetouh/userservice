@@ -8,11 +8,15 @@ import com.imadelfetouh.userservice.model.dto.RegisterDTO;
 import com.imadelfetouh.userservice.model.dto.UserData;
 import com.imadelfetouh.userservice.model.response.ResponseModel;
 import com.imadelfetouh.userservice.model.response.ResponseType;
+import com.imadelfetouh.userservice.rabbit.RabbitConfiguration;
+import com.rabbitmq.client.Connection;
 import org.junit.jupiter.api.*;
 import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.io.IOException;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RegisterTests {
@@ -65,6 +69,17 @@ class RegisterTests {
         ResponseModel<UserData> responseModel = registerDalDB.register(registerDTO);
 
         Assertions.assertEquals(ResponseType.USERNAMEALREADYINUSE, responseModel.getResponseType());
+    }
+
+    @Test
+    @Order(4)
+    void addUserWhileRabbitDown() throws IOException {
+        Runtime.getRuntime().exec("docker stop rabbit");
+        Runtime.getRuntime().exec("docker rm rabbit");
+//        Connection connection = RabbitConfiguration.getInstance().getConnection();
+//        connection.close();
+
+
     }
 
 }
